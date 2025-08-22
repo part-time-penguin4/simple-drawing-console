@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>  // For strcmp() function
+#include <math.h>
 
 // Canvas dimensions
 #define WIDTH 40
@@ -42,6 +43,7 @@ void displayCanvas() {
     printf("\n");
 }
 
+
 // 3. DRAW PIXEL - Place a character at specific coordinates
 void drawPixel(int x, int y, char brush) {
     // Check if coordinates are within canvas bounds
@@ -57,16 +59,59 @@ void drawPixel(int x, int y, char brush) {
     printf("Drew '%c' at position (%d, %d)\n", brush, x, y);
 }
 
-// 4. CLEAR CANVAS - Reset to empty
+
+// 4. DRAW LINE - Connect two points with characters
+void drawLine(int x1, int y1, int x2, int y2, char brush) {
+    // Check if both points are within canvas bounds
+    if (x1 < 0 || x1 >= WIDTH || y1 < 0 || y1 >= HEIGHT ||
+        x2 < 0 || x2 >= WIDTH || y2 < 0 || y2 >= HEIGHT) {
+        printf("Error: Line coordinates are out of bounds!\n");
+        printf("Both points must be within (0,0) to (%d,%d)\n", WIDTH-1, HEIGHT-1);
+        return;
+    }
+
+    // Bresenham's line algorithm
+    int dx = abs(x2 - x1);
+    int dy = abs(y2 - y1);
+    int sx = (x1 < x2) ? 1 : -1;  // Step direction for x
+    int sy = (y1 < y2) ? 1 : -1;  // Step direction for y
+    int err = dx - dy;
+    int x = x1, y = y1;
+    
+    while (1) {
+        // Draw current point
+        canvas[y][x] = brush;
+        
+        // Check if we've reached the end point
+        if (x == x2 && y == y2) break;
+        
+        // Calculate error and adjust coordinates
+        int e2 = 2 * err;
+        if (e2 > -dy) {
+            err -= dy;
+            x += sx;
+        }
+        if (e2 < dx) {
+            err += dx;
+            y += sy;
+        }
+    }
+    
+    printf("Drew line from (%d,%d) to (%d,%d)\n", x1, y1, x2, y2);
+}
+
+    
+// 5. CLEAR CANVAS - Reset to empty
 void clearCanvas() {
     initializeCanvas();
     printf("Canvas cleared!\n");
 }
 
-// 5. DISPLAY MENU - Show available commands
+// 6. DISPLAY MENU - Show available commands
 void displayMenu() {
     printf("\n=== DRAWING COMMANDS ===\n");
     printf("draw x y     - Draw at position (x, y)\n");
+    printf("line x1 y1 x2 y2 - Draw line from (x1,y1) to (x2,y2)\n");
     printf("brush c      - Change brush to character 'c'\n");
     printf("clear        - Clear the canvas\n");
     printf("show         - Display current canvas\n");
@@ -75,10 +120,10 @@ void displayMenu() {
     printf("========================\n\n");
 }
 
-// 6. INTERACTIVE DRAWING LOOP - Main program logic
+// 7. INTERACTIVE DRAWING LOOP - Main program logic
 int main() {
     char command[20];
-    int x, y;
+    int x, y, x1, y1, x2, y2;
     char brushChar = '*';  // Default brush
     char newBrush;
     
@@ -115,6 +160,19 @@ int main() {
                 while (getchar() != '\n');
             }
         }
+        else if (strcmp(command, "line") == 0) {
+            // Get coordinates for line drawing
+            printf("Enter x1 y1 x2 y2 coordinates: ");
+            fflush(stdout);  // Force output to appear
+            if (scanf("%d %d %d %d", &x1, &y1, &x2, &y2) == 4) {
+                drawLine(x1, y1, x2, y2, brushChar);
+                displayCanvas();
+            } else {
+                printf("Invalid coordinates. Use format: x1 y1 x2 y2\n");
+                // Clear input buffer
+                while (getchar() != '\n');
+            }
+        }
         else if (strcmp(command, "brush") == 0) {
             // Change brush character
             printf("Enter new brush character: ");
@@ -146,6 +204,7 @@ int main() {
         
         // Clear any remaining input
         while (getchar() != '\n');
+    
     }
     
     return 0;
