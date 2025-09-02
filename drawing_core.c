@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>  // For strcmp() function
 #include <math.h>
+#include <string.h>
 
 // Canvas dimensions
 #define WIDTH 40
@@ -120,7 +121,38 @@ void displayMenu() {
     printf("========================\n\n");
 }
 
-// 7. INTERACTIVE DRAWING LOOP - Main program logic
+// 7. SAVE CANVAS TO FILE - Write current canvas to a text file
+void saveCanvas(const char* filename) {
+    // Step 1: Try to open file for writing
+    FILE* file = fopen(filename, "w");
+    if (file == NULL) {
+        printf("Error: Could not create file '%s'\n", filename);
+        printf("Make sure you have write permissions in this directory.\n");
+        return;
+    }
+    
+    printf("Saving canvas to '%s'...\n", filename);
+    
+    // Step 2: Write a header with canvas dimensions
+    // This helps us validate the file when loading
+    fprintf(file, "CANVAS %d %d\n", WIDTH, HEIGHT);
+    
+    // Step 3: Write canvas data row by row
+    for (int row = 0; row < HEIGHT; row++) {
+        // Write each character in the row
+        for (int col = 0; col < WIDTH; col++) {
+            fputc(canvas[row][col], file);
+        }
+        // End each row with a newline for readability
+        fputc('\n', file);
+    }
+    
+    // Step 4: Close the file (very important!)
+    fclose(file);
+    printf("Canvas saved successfully!\n");
+}
+
+// 8. INTERACTIVE DRAWING LOOP - Main program logic
 int main() {
     char command[20];
     int x, y, x1, y1, x2, y2;
@@ -198,13 +230,23 @@ int main() {
             printf("Thanks for drawing! Goodbye!\n");
             break;
         }
+        else if (strcmp(command, "save") == 0) {
+            // Save canvas to file
+            char filename[50];
+            printf("Enter filename to save: ");
+            fflush(stdout);
+            if (scanf("%s", filename) == 1) {
+                saveCanvas(filename);
+            } else {
+                printf("Invalid filename.\n");
+            }
+        }
         else {
             printf("Unknown command '%s'. Type 'menu' for help.\n", command);
         }
         
         // Clear any remaining input
         while (getchar() != '\n');
-    
     }
     
     return 0;
