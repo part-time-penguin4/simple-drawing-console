@@ -151,6 +151,72 @@ void saveCanvas(const char* filename) {
     fclose(file);
     printf("Canvas saved successfully!\n");
 }
+// LOAD CANVAS FROM FILE - Read canvas data from a text file
+void loadCanvas(const char* filename) {
+    // Step 1: Try to open file for reading
+    FILE* file = fopen(filename, "r");
+    if (file == NULL) {
+        printf("Error: Could not open file '%s'\n", filename);
+        printf("Make sure the file exists and you have read permissions.\n");
+        return;
+    }
+    
+    printf("Loading canvas from '%s'...\n", filename);
+    
+    // Step 2: Read and validate the header
+    char header[10];  // Buffer to store "CANVAS" 
+    int fileWidth, fileHeight;
+    
+    // Read the header line: "CANVAS width height"
+    if (fscanf(file, "%s %d %d\n", header, &fileWidth, &fileHeight) != 3) {
+        printf("Error: Invalid file format. Expected 'CANVAS width height' on first line.\n");
+        fclose(file);
+        return;
+    }
+    
+    // Check if it's actually a canvas file
+    if (strcmp(header, "CANVAS") != 0) {
+        printf("Error: Not a valid canvas file. File should start with 'CANVAS'.\n");
+        fclose(file);
+        return;
+    }
+    
+    // Check if dimensions match our current canvas
+    if (fileWidth != WIDTH || fileHeight != HEIGHT) {
+        printf("Error: File dimensions (%d x %d) don't match current canvas (%d x %d)\n", 
+               fileWidth, fileHeight, WIDTH, HEIGHT);
+        printf("This version only supports files with matching dimensions.\n");
+        fclose(file);
+        return;
+    }
+    
+    // Step 3: Read canvas data
+    for (int row = 0; row < HEIGHT; row++) {
+        for (int col = 0; col < WIDTH; col++) {
+            int ch = fgetc(file);
+            
+            // Check for unexpected end of file
+            if (ch == EOF) {
+                printf("Error: Unexpected end of file at row %d, column %d\n", row, col);
+                fclose(file);
+                return;
+            }
+            
+            // Store the character in our canvas
+            canvas[row][col] = (char)ch;
+        }
+        
+        // Skip the newline character at the end of each row
+        int newline = fgetc(file);
+        if (newline != '\n' && newline != EOF) {
+            printf("Warning: Expected newline at end of row %d\n", row);
+        }
+    }
+    
+    // Step 4: Close the file
+    fclose(file);
+    printf("Canvas loaded successfully!\n");
+}
 
 // 8. INTERACTIVE DRAWING LOOP - Main program logic
 int main() {
