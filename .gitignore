@@ -16,3 +16,12 @@
 # System files
 .DS_Store
 Thumbs.db
+
+# Backup files
+*~
+*.bak
+*.tmp
+
+# Output files  
+output/
+drawings/
