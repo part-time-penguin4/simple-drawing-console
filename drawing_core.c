@@ -241,11 +241,10 @@ int main() {
         // Get user input
         if (scanf("%s", command) != 1) {
             printf("Invalid input. Try again.\n");
-            continue;
         }
         
         // Process different commands
-        if (strcmp(command, "draw") == 0) {
+        else if (strcmp(command, "draw") == 0) {
             // Get coordinates for drawing
             printf("Enter x y coordinates: ");
             fflush(stdout);  // Force output to appear
@@ -254,8 +253,6 @@ int main() {
                 displayCanvas();
             } else {
                 printf("Invalid coordinates. Use format: x y\n");
-                // Clear input buffer
-                while (getchar() != '\n');
             }
         }
         else if (strcmp(command, "line") == 0) {
@@ -267,8 +264,6 @@ int main() {
                 displayCanvas();
             } else {
                 printf("Invalid coordinates. Use format: x1 y1 x2 y2\n");
-                // Clear input buffer
-                while (getchar() != '\n');
             }
         }
         else if (strcmp(command, "brush") == 0) {
